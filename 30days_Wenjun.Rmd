@@ -1,0 +1,121 @@
+---
+title: "30daysmap_Wenjun"
+author: "Wenjun Zhu"
+date: "2024-11-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r cars}
+data_q1 <- read.csv("~/Desktop/Penn/24Fall/communication/30/day1/indego-trips-2024-q1.csv")
+data_q2 <- read.csv("~/Desktop/Penn/24Fall/communication/30/day1/indego-trips-2024-q2.csv")
+```
+
+```{r}
+data_2024 <- rbind(data_q1, data_q2)
+head(data_2024)
+```
+
+
+```{r, echo=FALSE}
+install.packages("ggmap")
+library(dplyr)
+library(ggplot2)
+library(ggmap)
+```
+```{r}
+start_counts <- data_2024 %>%
+  group_by(start_station, start_lat, start_lon) %>%
+  summarise(count = n()) %>%
+  ungroup()
+```
+```{r}
+start_counts_filtered <- start_counts %>%
+  filter(!is.na(start_lat), !is.na(start_lon)) %>%  # 去除 NA 值
+  filter(start_lat >= 39.8, start_lat <= 40.1,
+         start_lon >= -75.3, start_lon <= -75.1) 
+```
+
+
+
+
+
+```{r}
+remove.packages("tidycensus")
+install.packages("tidycensus")
+install.packages("sf")
+install.packages("ggplot2")
+library(tidycensus)
+library(sf)
+library(ggplot2)
+```
+
+
+```{r}
+philly_boundaries <- get_acs(
+  geography = "county",
+  variables = "B01003_001", # 总人口变量（只为确保有数据）
+  state = "PA",
+  county = "Philadelphia",
+  geometry = TRUE
+)
+```
+```{r}
+install.packages("osmdata")
+library(osmdata)
+```
+
+
+```{r}
+streets <- st_read("~/Desktop/Penn/24Fall/communication/30/day1/PhiladelphiaStreetCenterlines202403/PhiladelphiaStreetCenterlines202403.shp")
+```
+
+
+
+
+```{r}
+streets <- st_transform(streets, crs = 4326)
+start_counts_filtered <- st_as_sf(start_counts_filtered, coords = c("start_lon", "start_lat"), crs = 4326)
+```
+
+
+```{r}
+library(ggplot2)
+
+gg <- ggplot() +
+  geom_sf(data = streets, color = "grey50", size = 0.5, alpha = 0.8) +
+  geom_sf(data = start_counts_filtered, aes(size = count, color = count), 
+          alpha = 0.7) +
+  scale_size_continuous(range = c(0.3, 6), name = "Usage Count") +
+  scale_color_gradient(low = "#00FF99", high = "#00CCFF", name = "Usage Count") +
+  labs(title = "Philadelphia Indego Station Usage (Start Point)",
+       subtitle = "DAY1 - Point Map",
+       x = "Longitude", y = "Latitude") +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "black"),
+    panel.background = element_rect(fill = "black"),
+    legend.text = element_text(color = "white", size = 12),
+    legend.title = element_text(color = "white", size = 14),
+    plot.title = element_text(color = "white", size = 20, face = "bold"),
+    plot.subtitle = element_text(color = "white", size = 16, face = "italic"),
+    plot.title.position = "plot"
+  ) +
+  guides(color = guide_legend(override.aes = list(size = 6))) +
+  annotate("text", x = -75.16, y = 39.95, label = "The highest usage is in central Philadelphia,\nreflecting popular commuting zones.",
+           color = "white", size = 4, hjust = 0, vjust = 1)
+
+# 保存图像为高分辨率的 PNG 文件
+ggsave("Philadelphia_Indego_Map.png", plot = gg, width = 12, height = 8, dpi = 300)
+
+```
+
+
+```{r}
+gg
+```
+
