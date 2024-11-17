@@ -27,6 +27,8 @@ library(dplyr)
 library(ggplot2)
 library(ggmap)
 ```
+
+
 ```{r}
 start_counts <- data_2024 %>%
   group_by(start_station, start_lat, start_lon) %>%
@@ -64,6 +66,7 @@ philly_boundaries <- get_acs(
   geometry = TRUE
 )
 ```
+
 ```{r}
 install.packages("osmdata")
 library(osmdata)
@@ -119,3 +122,286 @@ ggsave("Philadelphia_Indego_Map.png", plot = gg, width = 12, height = 8, dpi = 3
 gg
 ```
 
+
+
+## Day2
+
+
+
+```{r}
+
+streets <- st_read("~/Desktop/Penn/24Fall/communication/30/day2/Functional_Classification_TDA/Functional_Classification_TDA.shp")
+```
+
+```{r}
+print(streets)
+summary(streets)
+```
+```{r}
+
+# 定义分类、颜色和线条粗细映射
+funclass_styles <- data.frame(
+  FUNCLASS = c("01", "02", "04", "06", "07", "08", "09", "11", "12", "14", "16", "17", "18", "19"),
+  color = c("#2B8CBE", "#A6BDDB", "#DFC27D", "#A1D99B", "#31A354", "#D9F0A3", "#969696", "#0570B0", "#74A9CF", 
+            "#C994C7", "#EF6548", "#FEE391", "#FDBB84", "#BDBDBD"),
+  size = c(1.2, 1, 0.8, 0.8, 0.6, 0.6, 0.4, 1.2, 1, 0.8, 0.6, 0.6, 0.4, 0.4)
+)
+
+# 将颜色和线条粗细映射到原数据
+streets <- streets %>%
+  left_join(funclass_styles, by = c("FUNCLASS" = "FUNCLASS"))
+```
+
+```{r}
+gg2 <- ggplot(data = streets) +
+  geom_sf(aes(color = as.factor(FUNCLASS), size = size), show.legend = TRUE) +
+  scale_color_manual(values = funclass_styles$color, 
+                     labels = c(
+                       "01 - Principal Arterial-Interstate RURAL",
+                       "02 - Principal Arterial-Expressway RURAL",
+                       "04 - Principal Arterial-Other RURAL",
+                       "06 - Minor Arterial RURAL",
+                       "07 - Major Collector RURAL",
+                       "08 - Minor Collector RURAL",
+                       "09 - Local RURAL",
+                       "11 - Principal Arterial-Interstate URBAN",
+                       "12 - Principal Arterial-Freeway and Expressway URBAN",
+                       "14 - Principal Arterial-Other URBAN",
+                       "16 - Minor Arterial URBAN",
+                       "17 - Major Collector URBAN",
+                       "18 - Minor Collector (Fed Aid) URBAN",
+                       "19 - Local URBAN"
+                     ),
+                     name = "Roadway Classification") +
+  scale_size_identity() +
+  labs(
+    title = "Roadway Functional Classification System (Florida)",
+    subtitle = "DAY2 - Lines Map",
+    caption = "1. Primary arterials and highways are concentrated\nin major urban areas like Miami, Orlando, and Tampa,\nwhere higher traffic capacity is required.\n2. Secondary roads are more common in rural and\nless populated areas (e.g., northern and central Florida),\nindicating lower traffic demand in these regions."
+  ) +
+  theme_void() +
+  theme(
+    plot.background = element_rect(fill = "white", color = NA),
+    panel.background = element_rect(fill = "white", color = NA),
+    legend.position = "right",
+    legend.text = element_text(color = "black", size = 8),
+    legend.title = element_text(color = "black", size = 10, face = "bold"),
+    plot.title = element_text(color = "black", size = 16, face = "bold"),
+    plot.subtitle = element_text(color = "black", size = 12, face = "italic"),
+    plot.caption = element_text(color = "black", size = 8, hjust = 0)
+  )
+
+gg2
+```
+
+
+
+
+```{r}
+ggsave("02-Wenjun-Lines.png", plot = gg2, width = 12, height = 8, dpi = 300)
+```
+
+
+
+
+##Day3
+
+
+```{r}
+install.packages("terra")
+install.packages("ggplot2")
+install.packages("sf")
+install.packages("tmap") 
+```
+
+```{r}
+library(terra)
+
+pm_raster <- rast("~/Desktop/Penn/24Fall/communication/30/days/AnnAvg1_14_300mRaster/aa14_pm300m")
+no_raster <- rast("~/Desktop/Penn/24Fall/communication/30/days/AnnAvg1_14_300mRaster/aa14_no300m")
+bc_raster <- rast("~/Desktop/Penn/24Fall/communication/30/days/AnnAvg1_14_300mRaster/aa14_bc300m")
+
+```
+
+```{r}
+install.packages("cowplot")
+```
+
+
+
+
+```{r}
+
+library(ggplot2)
+library(cowplot)
+pm_df <- as.data.frame(pm_raster, xy = TRUE)
+no_df <- as.data.frame(no_raster, xy = TRUE)
+bc_df <- as.data.frame(bc_raster, xy = TRUE)
+
+
+theme_map_large <- theme_minimal() + 
+  theme(
+    axis.title = element_blank(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank(),
+    plot.title = element_text(hjust = 0.5, size = 12, face = "bold"),
+    plot.caption = element_text(size = 8, hjust = 0.5),  
+    legend.position = "right"
+  )
+
+orange_palette <- scale_fill_gradient(low = "#FFE5B4", high = "#FF4500", name = "")
+
+pm_plot <- ggplot(data = pm_df) +
+  geom_raster(aes(x = x, y = y, fill = aa14_pm300m)) +
+  labs(
+    title = "PM2.5 (µg/m³)",
+    caption = "High PM2.5 levels in central Manhattan\nare primarily due to heavy traffic, dense\nbuildings with high energy consumption,\nand limited air circulation caused by\nthe urban canyon effect, compounded by\nregional pollution and construction activities."
+  ) +
+  theme_map_large +
+  coord_sf() +
+  orange_palette
+
+no_plot <- ggplot(data = no_df) +
+  geom_raster(aes(x = x, y = y, fill = aa14_no300m)) +
+  labs(
+    title = "Nitric Oxide (ppb)",
+    caption = "NO levels are likely elevated along\nmajor highways or bridges, such as\nthe Brooklyn-Queens Expressway or\nGeorge Washington Bridge,\nwhere vehicle emissions are concentrated."
+  ) +
+  theme_map_large +
+  coord_sf() +
+  orange_palette
+
+bc_plot <- ggplot(data = bc_df) +
+  geom_raster(aes(x = x, y = y, fill = aa14_bc300m)) +
+  labs(
+    title = "Black Carbon (µg/m³)",
+    caption = "Black Carbon is highest in central\nManhattan and near major routes due to\ndiesel traffic and trapped pollutants.\nPorts and industrial areas also\ncontribute through ship and\nmachinery emissions."
+  ) +
+  theme_map_large +
+  coord_sf() +
+  orange_palette
+
+combined_plot <- plot_grid(pm_plot, no_plot, bc_plot, ncol = 3, align = "h", rel_widths = c(1.2, 1.2, 1.2))
+
+title <- ggdraw() + 
+  draw_label("NYC Air Pollution Levels", fontface = 'bold', size = 14, hjust = 0.5) +
+  theme(plot.margin = margin(0, 0, 0, 0))
+
+subtitle <- ggdraw() + 
+  draw_label("DAY6: Raster Map", size = 12, fontface = "italic",hjust = 0.5) +
+  theme(plot.margin = margin(0, 0, 10, 0))
+
+gg6 <- plot_grid(title, subtitle, combined_plot, ncol = 1, rel_heights = c(0.1, 0.05, 1.2))
+print(gg6)
+```
+
+```{r}
+ggsave("06-Wenjun-Raster.png", plot = gg6, width = 14, height = 8, bg = "white", dpi = 300)
+```
+
+## DAY3
+
+```{r}
+library(tidycensus)
+library(sf)
+library(ggplot2)
+library(dplyr)
+```
+
+```{r}
+nyc_data <- get_acs(
+  geography = "tract", 
+  variables = c(population = "B01003_001", area = "B01001_001"), # 人口总数
+  state = "NY", 
+  county = c("New York", "Kings", "Queens", "Bronx", "Richmond"), # NYC 的五个县
+  geometry = TRUE # 获取地理数据
+)
+
+# 查看数据
+head(nyc_data)
+```
+
+```{r}
+population_data <- nyc_data %>%
+  filter(variable == "population") %>%
+  select(GEOID, population = estimate, geometry)
+```
+
+
+```{r}
+population_data_clean <- population_data %>%
+  filter(population > 0) %>%       # 去掉人口为0的区域
+  filter(!st_is_empty(geometry)) 
+nyc_boundary <- st_read("~/Downloads/Borough Boundaries/geo_export_38714e5b-2192-4698-969b-a9ad308ad472.shp")
+
+nyc_boundary <- st_transform(nyc_boundary, crs = st_crs(population_data_clean))
+population_data_clipped <- st_intersection(population_data_clean, nyc_boundary)
+```
+```{r}
+install.packages("showtext")
+library(showtext) # 用于引入艺术字体
+
+```
+
+
+```{r}
+font_add_google("Lobster", "lobster") # 标题字体
+font_add_google("Roboto", "roboto")   # 图例和轴标签字体
+font_add_google("Open Sans", "open") # 副标题和说明字体
+showtext_auto()
+
+# 确定人口范围的分布
+min_population <- min(population_data_clipped$population)
+max_population <- max(population_data_clipped$population)
+mean_population <- mean(population_data_clipped$population)
+```
+
+```{r}
+# 绘制地图
+gg3 <- ggplot(population_data_clipped) +
+  geom_sf(aes(fill = population), color = NA) + # 移除边框
+  scale_fill_viridis_c(
+    option = "magma",
+    name = "Population",
+    limits = c(min_population, max_population), # 设置最大最小值
+    breaks = c(min_population, mean_population, max_population), # 自定义图例显示
+    labels = c(paste("Min:", round(min_population)),
+               paste("Mean:", round(mean_population)),
+               paste("Max:", round(max_population))) # 图例具体数值
+  ) + 
+  theme_minimal() +
+  theme(
+    # 设置背景颜色
+    panel.background = element_rect(fill = "#FFFAE5", color = NA), # 面板背景改为淡黄色
+    plot.background = element_rect(fill = "#FFFAE5", color = NA),  # 整张图背景改为浅橙色
+
+    # 标题样式
+    plot.title = element_text(size = 36, hjust = 0.5, family = "lobster", face = "bold", color = "black"),
+    plot.subtitle = element_text(size = 30, hjust = 0.5, family = "open", face = "italic", color = "gray30"), # 副标题字体
+    plot.caption = element_text(size = 20, hjust = 0.5, family = "open", face = "italic", color = "gray50"),  # Caption 样式
+
+    # 图例样式
+    legend.title = element_text(size = 24, family = "roboto", face = "bold", color = "black"), # 图例标题字体
+    legend.text = element_text(size = 20, family = "roboto", color = "black"),                # 图例内容字体
+
+    # 轴样式
+    axis.text = element_blank(),        # 移除坐标轴刻度
+    axis.ticks = element_blank(),       # 移除坐标轴刻度线
+    panel.grid = element_blank(),       # 移除网格线
+    plot.margin = margin(20, 20, 20, 20), # 增加边距
+    legend.position = "right"           # 图例位置
+  ) +
+  coord_sf(xlim = c(-74.3, -73.7), ylim = c(40.5, 41), expand = FALSE) + # 调整显示范围
+  labs(
+    title = "Population Distribution in NYC Census Tracts (Clipped)",
+    subtitle = "DAY3: Polygon Map",
+    caption = "Source: ACS via tidycensus\nAuthor: Wenjun Zhu | Tools: R | 11.16.2024"
+  )
+
+
+gg3
+```
+
+```{r}
+ggsave("03-Wenjun-Polygon.png", plot = gg3, width = 6, height = 6, dpi = 300)
+```
