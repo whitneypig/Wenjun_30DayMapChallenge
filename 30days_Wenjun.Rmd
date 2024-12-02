@@ -37,7 +37,7 @@ start_counts <- data_2024 %>%
 ```
 ```{r}
 start_counts_filtered <- start_counts %>%
-  filter(!is.na(start_lat), !is.na(start_lon)) %>%  # 去除 NA 值
+  filter(!is.na(start_lat), !is.na(start_lon)) %>%  
   filter(start_lat >= 39.8, start_lat <= 40.1,
          start_lon >= -75.3, start_lon <= -75.1) 
 ```
@@ -60,7 +60,7 @@ library(ggplot2)
 ```{r}
 philly_boundaries <- get_acs(
   geography = "county",
-  variables = "B01003_001", # 总人口变量（只为确保有数据）
+  variables = "B01003_001", 
   state = "PA",
   county = "Philadelphia",
   geometry = TRUE
@@ -139,7 +139,6 @@ summary(streets)
 ```
 ```{r}
 
-# 定义分类、颜色和线条粗细映射
 funclass_styles <- data.frame(
   FUNCLASS = c("01", "02", "04", "06", "07", "08", "09", "11", "12", "14", "16", "17", "18", "19"),
   color = c("#2B8CBE", "#A6BDDB", "#DFC27D", "#A1D99B", "#31A354", "#D9F0A3", "#969696", "#0570B0", "#74A9CF", 
@@ -147,7 +146,6 @@ funclass_styles <- data.frame(
   size = c(1.2, 1, 0.8, 0.8, 0.6, 0.6, 0.4, 1.2, 1, 0.8, 0.6, 0.6, 0.4, 0.4)
 )
 
-# 将颜色和线条粗细映射到原数据
 streets <- streets %>%
   left_join(funclass_styles, by = c("FUNCLASS" = "FUNCLASS"))
 ```
@@ -311,13 +309,12 @@ library(dplyr)
 ```{r}
 nyc_data <- get_acs(
   geography = "tract", 
-  variables = c(population = "B01003_001", area = "B01001_001"), # 人口总数
+  variables = c(population = "B01003_001", area = "B01001_001"), 
   state = "NY", 
-  county = c("New York", "Kings", "Queens", "Bronx", "Richmond"), # NYC 的五个县
-  geometry = TRUE # 获取地理数据
+  county = c("New York", "Kings", "Queens", "Bronx", "Richmond"), 
+  geometry = TRUE 
 )
 
-# 查看数据
 head(nyc_data)
 ```
 
@@ -330,7 +327,7 @@ population_data <- nyc_data %>%
 
 ```{r}
 population_data_clean <- population_data %>%
-  filter(population > 0) %>%       # 去掉人口为0的区域
+  filter(population > 0) %>%       
   filter(!st_is_empty(geometry)) 
 nyc_boundary <- st_read("~/Downloads/Borough Boundaries/geo_export_38714e5b-2192-4698-969b-a9ad308ad472.shp")
 
@@ -339,59 +336,52 @@ population_data_clipped <- st_intersection(population_data_clean, nyc_boundary)
 ```
 ```{r}
 install.packages("showtext")
-library(showtext) # 用于引入艺术字体
+library(showtext) 
 
 ```
 
 
 ```{r}
-font_add_google("Lobster", "lobster") # 标题字体
-font_add_google("Roboto", "roboto")   # 图例和轴标签字体
-font_add_google("Open Sans", "open") # 副标题和说明字体
+font_add_google("Lobster", "lobster") 
+font_add_google("Roboto", "roboto")   
+font_add_google("Open Sans", "open") 
 showtext_auto()
 
-# 确定人口范围的分布
 min_population <- min(population_data_clipped$population)
 max_population <- max(population_data_clipped$population)
 mean_population <- mean(population_data_clipped$population)
 ```
 
 ```{r}
-# 绘制地图
 gg3 <- ggplot(population_data_clipped) +
-  geom_sf(aes(fill = population), color = NA) + # 移除边框
+  geom_sf(aes(fill = population), color = NA) + 
   scale_fill_viridis_c(
     option = "magma",
     name = "Population",
-    limits = c(min_population, max_population), # 设置最大最小值
-    breaks = c(min_population, mean_population, max_population), # 自定义图例显示
+    limits = c(min_population, max_population), 
+    breaks = c(min_population, mean_population, max_population), 
     labels = c(paste("Min:", round(min_population)),
                paste("Mean:", round(mean_population)),
-               paste("Max:", round(max_population))) # 图例具体数值
+               paste("Max:", round(max_population))) 
   ) + 
   theme_minimal() +
   theme(
-    # 设置背景颜色
-    panel.background = element_rect(fill = "#FFFAE5", color = NA), # 面板背景改为淡黄色
-    plot.background = element_rect(fill = "#FFFAE5", color = NA),  # 整张图背景改为浅橙色
-
-    # 标题样式
+    panel.background = element_rect(fill = "#FFFAE5", color = NA), 
+    plot.background = element_rect(fill = "#FFFAE5", color = NA),  
     plot.title = element_text(size = 36, hjust = 0.5, family = "lobster", face = "bold", color = "black"),
-    plot.subtitle = element_text(size = 30, hjust = 0.5, family = "open", face = "italic", color = "gray30"), # 副标题字体
-    plot.caption = element_text(size = 20, hjust = 0.5, family = "open", face = "italic", color = "gray50"),  # Caption 样式
+    plot.subtitle = element_text(size = 30, hjust = 0.5, family = "open", face = "italic", color = "gray30"), 
+    plot.caption = element_text(size = 20, hjust = 0.5, family = "open", face = "italic", color = "gray50"), 
+    legend.title = element_text(size = 24, family = "roboto", face = "bold", color = "black"),
+    legend.text = element_text(size = 20, family = "roboto", color = "black"),               
 
-    # 图例样式
-    legend.title = element_text(size = 24, family = "roboto", face = "bold", color = "black"), # 图例标题字体
-    legend.text = element_text(size = 20, family = "roboto", color = "black"),                # 图例内容字体
 
-    # 轴样式
-    axis.text = element_blank(),        # 移除坐标轴刻度
-    axis.ticks = element_blank(),       # 移除坐标轴刻度线
-    panel.grid = element_blank(),       # 移除网格线
-    plot.margin = margin(20, 20, 20, 20), # 增加边距
-    legend.position = "right"           # 图例位置
+    axis.text = element_blank(),       
+    axis.ticks = element_blank(),    
+    panel.grid = element_blank(),     
+    plot.margin = margin(20, 20, 20, 20), 
+    legend.position = "right"          
   ) +
-  coord_sf(xlim = c(-74.3, -73.7), ylim = c(40.5, 41), expand = FALSE) + # 调整显示范围
+  coord_sf(xlim = c(-74.3, -73.7), ylim = c(40.5, 41), expand = FALSE) + 
   labs(
     title = "Population Distribution in NYC Census Tracts (Clipped)",
     subtitle = "DAY3: Polygon Map",
@@ -405,3 +395,579 @@ gg3
 ```{r}
 ggsave("03-Wenjun-Polygon.png", plot = gg3, width = 6, height = 6, dpi = 300)
 ```
+
+
+
+## day4: Hexagons
+
+```{r}
+tmp_geojson <- tempfile(fileext = ".geojson")
+
+download.file(
+  "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/communes.geojson",
+  tmp_geojson
+)
+library(sf)
+my_sf <- read_sf(tmp_geojson)
+
+my_sf <- my_sf[substr(my_sf$code, 1, 2) %in% c(
+  "06", "83",
+  "13", "30", "34", "11", "66"
+), ]
+```
+```{r}
+library(ggplot2)
+ggplot(my_sf) +
+  geom_sf(fill = "white", color = "black", linewidth = 0.3) +
+  theme_void()
+```
+
+```{r}
+france_data <- read.table(
+  "https://raw.githubusercontent.com/holtzy/R-graph-gallery/master/DATA/data_on_french_states.csv",
+  header = T, sep = ";"
+)
+
+head(france_data)
+```
+
+
+```{r}
+library(dplyr)
+my_sf_projected <- st_transform(my_sf, crs = 2154)
+my_sf_projected <- st_make_valid(my_sf_projected) 
+
+my_sf_merged <- my_sf_projected %>%
+  left_join(france_data, by = c("code" = "depcom")) %>%
+  mutate(nb_equip = ifelse(is.na(nb_equip), 0.01, nb_equip))
+```
+
+
+
+```{r}
+
+hex_grid <- st_make_grid(
+  my_sf_merged,
+  cellsize = 5000,
+  square = FALSE
+)
+
+
+hex_sf <- st_sf(geometry = hex_grid) %>%
+  st_intersection(st_union(my_sf_merged))
+```
+
+```{r}
+hex_sf <- hex_sf %>%
+  st_join(my_sf_merged, join = st_intersects) %>% 
+  group_by(geometry) %>%
+  summarize(nb_equip = sum(nb_equip, na.rm = TRUE))
+```
+
+
+```{r}
+library(sf)
+library(ggplot2)
+library(dplyr)
+library(showtext) 
+library(viridis) 
+
+
+showtext_auto()
+font_add_google("Lora", "lora") 
+
+hex_sf <- hex_sf %>%
+  mutate(
+    fill_color = case_when(
+      nb_equip == 0.01 ~ "No Data",
+      nb_equip <= 5 ~ "1-5",
+      nb_equip <= 10 ~ "6-10",
+      nb_equip <= 20 ~ "11-20",
+      nb_equip <= 50 ~ "21-50",
+      nb_equip > 50 ~ ">50"
+    )
+  )
+
+fill_colors <- c(
+  "No Data" = "gray80",
+  "1-5" = "#ffeda0",
+  "6-10" = "#a1dab4",
+  "11-20" = "#41b6c4",
+  "21-50" = "#2c7fb8",
+  ">50" = "#253494"
+)
+
+# 绘制 hex map
+gg4 <- ggplot() +
+  geom_sf(data = hex_sf, aes(fill = fill_color), color = "white", linewidth = 0.1)+
+  scale_fill_manual(
+    name = "Number of Restaurants", 
+    values = fill_colors,
+    na.translate = FALSE
+  ) +
+  theme_void() +
+  labs(
+    title = "South of France Restaurant Concentration", 
+    subtitle = "DAY4: Hexagons Map", 
+    caption = "Author: Wenjun Zhu | Tools: R | 11.21.2024\nSource: INSEE (https://www.insee.fr/fr/statistiques)" 
+  ) +
+  theme(
+    plot.background = element_rect(fill = "#f7f7f7", color = NA),
+    panel.background = element_rect(fill = "#f7f7f7", color = NA),
+    plot.title = element_text(family = "lora", size = 36, face = "bold"), 
+    plot.subtitle = element_text(family = "lora", size = 30, face = "italic", margin = margin(b = 10)), 
+    plot.caption = element_text(family = "lora", size = 18, hjust = 0.9), 
+    legend.position = "bottom", 
+    legend.title = element_text(size = 18, family = "lora"),
+    legend.text = element_text(size = 18, family = "lora"), 
+    legend.key.width = unit(1, "cm"), 
+    legend.spacing.x = unit(0.5, "cm") 
+  ) +
+  guides(fill = guide_legend(
+    direction = "horizontal", 
+    nrow = 1, 
+    byrow = TRUE 
+  ))
+
+gg4
+
+```
+
+
+```{r}
+ggsave("day4.png", plot = gg4, width = 6, height =4, dpi = 300)
+```
+
+
+
+##Day5:vintage
+
+
+
+```{r}
+library(osmdata)
+library(ggplot2)
+library(sf)
+
+
+bbox_venice_precise <- st_as_sfc(
+  st_bbox(c(xmin = 12.315, ymin = 45.425, xmax = 12.345, ymax = 45.445), crs = 4326)
+)
+
+water <- opq(bbox = c(12.3, 45.42, 12.37, 45.45)) %>%
+  add_osm_feature(key = "natural", value = "water") %>%
+  osmdata_sf()
+
+
+buildings <- opq(bbox = c(12.3, 45.42, 12.37, 45.45)) %>%
+  add_osm_feature(key = "building") %>%
+  osmdata_sf()
+
+
+water_fixed <- st_make_valid(water$osm_multipolygons)
+buildings_fixed <- st_make_valid(buildings$osm_polygons)
+
+
+water_clipped <- st_intersection(water_fixed, bbox_venice_precise)
+buildings_clipped <- st_intersection(buildings_fixed, bbox_venice_precise)
+
+```
+
+```{r}
+
+library(ggplot2)
+library(sf)
+library(grid)
+
+landmarks <- data.frame(
+  name = c("Saint Mark's Square", "Canal Grande"),
+  lon = c(12.3378, 12.3325), 
+  lat = c(45.4338, 45.4371) 
+)
+
+
+paper_texture <- rasterGrob(
+  png::readPNG("~/Downloads/asfalt-dark.png"), 
+  width = unit(1, "npc"), height = unit(1, "npc"), interpolate = TRUE
+)
+
+gg7 <-ggplot() +
+  annotate(
+    "rect",
+    xmin = bbox["xmin"], xmax = bbox["xmax"], 
+    ymin = bbox["ymin"], ymax = bbox["ymax"],
+    fill = "#f4ecd8", color = NA
+  ) +
+  annotation_custom(paper_texture, xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf) +
+  geom_sf(data = water_clipped, fill = "#76a5af", color = NA, alpha = 0.8) +
+  geom_sf(data = buildings_clipped, fill = "#d4a373", color = "#6b4226", alpha = 0.8,size = 0.3) +
+  geom_point(data = landmarks, aes(x = lon, y = lat), color = "#8b0000", size = 3) +
+  geom_text(
+    data = landmarks, aes(x = lon, y = lat, label = name),
+    color = "#8b0000", family = "serif", size = 4, fontface = "italic", fontface = "bold",hjust = -0.1, vjust = 0
+  ) +
+  theme_void() +
+  labs(
+    title = "Center City of Venice",
+    subtitle = "DAY7: Vintage Style",
+    caption = "Author: Wenjun Zhu | Tools: R | 11.22.2024\nSource: OpenStreetMap)"
+  ) +
+  theme(
+    plot.background = element_rect(fill = "#f4ecd8", color = NA),
+    plot.title = element_text(family = "serif", size = 28, face = "bold", color = "#6b4226", hjust = 0.5),
+    plot.subtitle = element_text(family = "serif", size = 18, color = "#6b4226",face = "italic", hjust = 0.5, margin = margin(b = 10)),
+    plot.caption = element_text(family = "serif", size = 12, color = "#6b4226", hjust = 0.5),
+    plot.title.position = "plot",
+    plot.caption.position = "plot",
+    plot.margin = margin(0, 0, 0, 0)
+  )
+gg7 
+```
+
+```{r}
+bbox <- st_bbox(water_clipped)
+aspect_ratio <- (bbox["xmax"] - bbox["xmin"]) / (bbox["ymax"] - bbox["ymin"])
+
+ggsave(
+  filename = "07-Wenjun-Vintage.png",
+  plot = gg7 ,
+  width = 10,                         
+  height = 10 / aspect_ratio,         
+  dpi = 300,                         
+  bg = "transparent"                 
+)
+```
+
+
+
+
+
+
+##day14
+
+```{r}
+install.packages(c("readxl","ggplot2", "dplyr", "rnaturalearthdata", "readr"))
+
+```
+
+
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(rnaturalearth)
+library(readr)
+library(readxl)
+
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+hdi_data <- read_excel("~/Downloads/HDR23-24_Statistical_Annex_HDI_Table.xlsx", skip = 7)
+
+hdi_data <- hdi_data %>%
+  select(1:3) %>% 
+  rename(
+    HDI_Rank = 1,      
+    Country = 2,      
+    HDI = 3            
+  )
+
+head(hdi_data)
+```
+```{r}
+hdi_data <- hdi_data %>% 
+  na.omit()
+```
+
+
+
+```{r}
+unmatched <- setdiff(hdi_data$Country, world$name)
+unmatched
+```
+```{r}
+name_mapping <- data.frame(
+  Country = c(
+    "Hong Kong, China (SAR)", "Korea (Republic of)", "United States", "Türkiye", 
+    "Saint Kitts and Nevis", "Antigua and Barbuda", "Brunei Darussalam", 
+    "Russian Federation", "Iran (Islamic Republic of)", "Bosnia and Herzegovina", 
+    "Saint Vincent and the Grenadines", "Dominican Republic", 
+    "Moldova (Republic of)", "Marshall Islands", "Viet Nam", 
+    "Palestine, State of", "Venezuela (Bolivarian Republic of)", 
+    "Bolivia (Plurinational State of)", "Equatorial Guinea", 
+    "Micronesia (Federated States of)", "Lao People's Democratic Republic", 
+    "Sao Tome and Principe", "Eswatini (Kingdom of)", "Solomon Islands", 
+    "Syrian Arab Republic", "Tanzania (United Republic of)", 
+    "Congo (Democratic Republic of the)", "Central African Republic", 
+    "South Sudan"
+  ),
+  name = c(
+    "Hong Kong", "South Korea", "United States of America", "Turkey", 
+    "St. Kitts and Nevis", "Antigua and Barb.", "Brunei", 
+    "Russia", "Iran", "Bosnia and Herz.", 
+    "St. Vin. and Gren.", "Dominican Rep.", 
+    "Moldova", "Marshall Is.", "Vietnam", 
+    "Palestine", "Venezuela", 
+    "Bolivia", "Eq. Guinea", 
+    "Micronesia", "Laos", 
+    "Sao Tome and Principe", "Eswatini", "Solomon Is.", 
+    "Syria", "Tanzania", 
+    "Dem. Rep. Congo", "Central African Rep.", 
+    "South Sudan"
+  )
+)
+```
+
+
+```{r}
+hdi_data <- hdi_data %>%
+  left_join(name_mapping, by = c("Country" = "Country")) %>%
+  mutate(Country = ifelse(is.na(name), Country, name)) %>%
+  select(-name)
+```
+
+```{r}
+world <- world %>%
+  left_join(hdi_data, by = c("name" = "Country"))
+```
+
+```{r}
+install.packages("ggtext")
+library(ggtext)
+```
+
+
+```{r}
+world <- world %>%
+  mutate(HDI = as.numeric(HDI))
+```
+
+
+
+
+```{r}
+library(showtext)
+showtext_auto()
+font_add_google("Montserrat", "Montserrat")  
+font_add_google("Playfair Display", "Playfair Display") 
+
+gg14 <-ggplot(data = world) +
+  geom_sf(aes(fill = HDI), color = "white", size = 0.1) +
+scale_fill_distiller(
+  name = "HDI",
+  palette = "YlGnBu",   
+  direction = 1,        
+  limits = c(0, 1),
+  na.value = "grey90",  
+  breaks = seq(0, 1, by = 0.1)
+) +
+   coord_sf(crs = "+proj=robin") +  
+  theme_minimal(base_size = 14) + 
+labs(
+    title = "Human Development Index, 2021",
+    subtitle = "*DAY14: A World Map*",
+    caption = "The Human Development Index (HDI) is a summary measure of key dimensionsof human development:\nA long and healthy life,a good education, and having a decent standard of living.\nAuthor: Wenjun Zhu | Tools: R | 11.24.2024\nSource: UNDP"
+  ) +
+  theme(
+    plot.title = element_text(family = "Playfair Display", size = 40, hjust = 0, face = "bold"),
+    plot.subtitle = element_markdown(family = "Montserrat",size = 24,hjust = 0, lineheight = 1.2), # 斜体 subtitle
+    plot.caption = element_text(family = "Montserrat", size = 20, hjust = 0,lineheight = 0.5,margin = margin(t = 10)),
+    legend.position = "bottom",
+    legend.key.width = unit(1.5, "cm"),
+    legend.key.height = unit(0.3, "cm"),
+    legend.text = element_text(family = "Montserrat", size = 18),
+    plot.margin = margin(20, 20, 20, 20),
+    panel.grid = element_blank(),
+    panel.background = element_rect(fill = "white", color = NA)
+  )
+
+gg14
+```
+
+
+```{r}
+ggsave(
+  filename = "14-Wenjun-World Map.png",   
+  plot = gg14,            
+  device = "png",                 
+  width = 10,
+  height = 6,
+  dpi = 300,
+  bg = "white" 
+)
+```
+
+
+
+
+## Day12: time and space
+
+
+```{r}
+install.packages(c("terra", "ggplot2", "RColorBrewer", "tmap"))
+library(terra)
+library(ggplot2)
+library(RColorBrewer)
+library(tmap)
+```
+
+```{r}
+main_folder <- "~/Downloads/upkg_5mloxpp803wq_Land_Cover_Change_1997_2017_v05_GRID/Spatial/v05"
+
+selected_years <- c("2005", "2010", "2015")
+year_folders <- file.path(main_folder, selected_years)
+
+raster_stack <- rast(year_folders)
+
+print(raster_stack)
+
+plot(raster_stack[[1]], main = "2005 Landcover")
+plot(raster_stack[[2]], main = "2010 Landcover")
+plot(raster_stack[[3]], main = "2015 Landcover")
+```
+```{r}
+reclass_matrix <- matrix(c(
+  1, 2, 0,  
+  3, 3, 1,  
+  4, 5, 1, 
+  6, 6, 0, 
+  7, 7, 0,  
+  8, 8, 0,  
+  9, 9, 0   
+), ncol = 3, byrow = TRUE)
+
+
+permeability_stack <- classify(raster_stack, reclass_matrix)
+```
+
+```{r}
+plot(permeability_stack[[1]], main = "2005: Impermeable vs Permeable", 
+     col = c("#3CAEA3", "#F6D55C"), legend = FALSE)
+plot(permeability_stack[[2]], main = "2010: Impermeable vs Permeable", 
+     col = c("#3CAEA3", "#F6D55C"), legend = FALSE)
+plot(permeability_stack[[3]], main = "2015: Impermeable vs Permeable", 
+     col = c("#3CAEA3", "#F6D55C"), legend = FALSE)
+```
+```{r}
+library(terra)
+library(ggplot2)
+library(cowplot)
+
+png("map_2005.png", width = 800, height = 800, res = 150) 
+plot(
+  permeability_stack[[1]], 
+  col = c("#3CAEA3", "#F6D55C"), 
+  main = "2005", 
+  cex.main = 2,  
+  cex.axis = 1.5,
+  cex.lab = 1.5,  
+  legend = FALSE 
+)
+dev.off()
+
+
+png("map_2015.png", width = 800, height = 800, res = 150) 
+plot(
+  permeability_stack[[3]], 
+  col = c("#3CAEA3", "#F6D55C"), 
+  main = "2015", 
+  cex.main = 2, 
+  cex.axis = 1.5, 
+  cex.lab = 1.5, 
+  legend = FALSE
+)
+dev.off()
+
+# 加载保存的地图图片
+map_2005 <- ggdraw() + draw_image("map_2005.png")
+map_2015 <- ggdraw() + draw_image("map_2015.png")
+```
+
+
+
+
+
+```{r}
+
+total_change <- permeability_stack[[3]] - permeability_stack[[1]]
+
+png("map_change.png", width = 800, height = 800, res = 150)
+plot(
+  total_change, 
+  col = c("#ED553B", "#FFFFFF", "#20639B"), 
+  main = "2005-2015 Change", 
+  cex.main = 2, 
+  cex.axis = 1.5, 
+  cex.lab = 1.5, 
+  legend = FALSE
+)
+dev.off()
+
+map_change <- ggdraw() + draw_image("map_change.png")
+```
+```{r}
+library(patchwork)
+library(ggplot2)
+
+main_title <- ggplot() + 
+  ggtitle("Land Cover Change Analysis: Houston (2005 - 2015)") + 
+  labs(
+    subtitle = "DAY 12: Time and Space",
+    caption = "The analysis highlights the changes in permeable and impermeable land cover between 2005 and 2015.\nRed areas in the third map represent regions where permeable surfaces were converted to impermeable ones.\nAuthor: Wenjun Zhu | Tools: R | 11.25.2024 | Source: HGAC"
+  ) + 
+  theme_void() +
+  theme(
+    plot.title = element_text(size = 30, hjust = 0, vjust = 1,face = "bold", family = "Arial", margin = margin(b = 10)),
+    plot.subtitle = element_text(size = 24,hjust = 0, vjust = 1,face = "italic", family = "serif", margin = margin(b = 15)),
+    plot.caption = element_text(size = 14, hjust = 0, family = "serif", margin = margin(t = 10)),
+    plot.margin = margin(t = 10, r = 10, b = 10, l = 50) 
+  )
+
+```
+
+
+
+```{r}
+library(grid)
+library(ggplot2)
+library(cowplot)
+
+legend_plot <- ggplot() +
+  annotate("rect", xmin = -0.5, xmax = 0.5, ymin = 2, ymax = 3, fill = "#3CAEA3") +
+  annotate("rect", xmin = -0.5, xmax = 0.5, ymin = 0, ymax = 1, fill = "#F6D55C") +
+  annotate("text", x = 0.7, y = 2.5, label = "Permeable", 
+           hjust = 0, size = 4, family = "serif") +
+  annotate("text", x = 0.7, y = 0.5, label = "Impermeable", 
+           hjust = 0, size = 4, family = "serif") +
+  coord_fixed(ratio = 1, xlim = c(-2.5, 8), ylim = c(0, 4)) +
+  theme_void()
+
+maps_combined <- plot_grid(
+  map_2005, map_2015, map_change,
+  ncol = 3, rel_widths = c(1, 1, 1)
+)
+
+final_plot <- ggdraw() +
+  draw_plot(maps_combined, x = 0, y = 0.15, width = 1, height = 0.85) +
+  draw_plot(legend_plot, x = -0.18, y = 0.02, width = 0.6, height = 0.15)
+
+gg12 <- plot_grid(
+  main_title, final_plot, 
+  ncol = 1, rel_heights = c(0.3, 1)
+)
+
+print(gg12)
+```
+
+
+```{r}
+ggsave(
+  filename = "12-Wenjun-Space&Time.png",     
+  plot = gg12,       
+  width = 12,                     
+  height = 8,                  
+  dpi = 300,                 
+  bg = "white"                              
+)
+```
+
+
