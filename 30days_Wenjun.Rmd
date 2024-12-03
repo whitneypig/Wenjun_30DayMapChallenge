@@ -35,6 +35,7 @@ start_counts <- data_2024 %>%
   summarise(count = n()) %>%
   ungroup()
 ```
+
 ```{r}
 start_counts_filtered <- start_counts %>%
   filter(!is.na(start_lat), !is.na(start_lon)) %>%  
@@ -90,11 +91,10 @@ start_counts_filtered <- st_as_sf(start_counts_filtered, coords = c("start_lon",
 library(ggplot2)
 
 gg <- ggplot() +
-  geom_sf(data = streets, color = "grey50", size = 0.5, alpha = 0.8) +
-  geom_sf(data = start_counts_filtered, aes(size = count, color = count), 
-          alpha = 0.7) +
-  scale_size_continuous(range = c(0.3, 6), name = "Usage Count") +
-  scale_color_gradient(low = "#00FF99", high = "#00CCFF", name = "Usage Count") +
+  geom_sf(data = streets, color = "white", size = 0.5, alpha = 0.4) +
+  geom_sf(data = start_counts_filtered, aes(size = count), 
+          color = "red", alpha = 0.5) +
+  scale_size_continuous(range = c(0.5, 6), name = "Usage Count") +
   labs(title = "Philadelphia Indego Station Usage (Start Point)",
        subtitle = "DAY1 - Point Map",
        x = "Longitude", y = "Latitude") +
@@ -108,12 +108,12 @@ gg <- ggplot() +
     plot.subtitle = element_text(color = "white", size = 16, face = "italic"),
     plot.title.position = "plot"
   ) +
-  guides(color = guide_legend(override.aes = list(size = 6))) +
+  guides(size = guide_legend(override.aes = list(color = "red", alpha = 0.8))) +
   annotate("text", x = -75.16, y = 39.95, label = "The highest usage is in central Philadelphia,\nreflecting popular commuting zones.",
-           color = "white", size = 4, hjust = 0, vjust = 1)
+           color = "white", size = 4.5, hjust = 0, vjust = 1)
+gg
 
-# 保存图像为高分辨率的 PNG 文件
-ggsave("Philadelphia_Indego_Map.png", plot = gg, width = 12, height = 8, dpi = 300)
+ggsave("~/Desktop/Penn/24Fall/communication/30/day1/01-Wenjun-Points.png", plot = gg, width = 12, height = 8, dpi = 300)
 
 ```
 

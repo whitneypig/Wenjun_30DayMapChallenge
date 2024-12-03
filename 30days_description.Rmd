@@ -1,0 +1,178 @@
+---
+title: "30 Days Map Challenge 2024- Wenjun Zhu"
+author: "Whitney Zhu"
+date: "2024-12-02"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Day 1: Points
+## Philadelphia Indego Station Usage 
+
+Ever wonder where the busiest bike-share stations are in Philadelphia? This map gives you the answer. This map shows Indego bike share station usage in Philadelphia. The red points highlight central Philadelphia as the main hub, reflecting high commuting demand. I tried to use the dark background emphasizes the red points, making hotspots stand out clearly.
+
+```{r, echo=FALSE}
+knitr::include_graphics("~/Desktop/Penn/24Fall/communication/30/day1/30daysall/01-Wenjun-Point.png")
+
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+# Day 2: Lines
+## Philadelphia Indego Station Usage 
+
+Florida’s roadways tell a story of urban and rural contrasts. Highways and primary arterials dominate cities like Miami and Orlando, while rural roads weave through quieter regions in the north and center. 
+
+*Design Consideration*: Color-coded classifications make it easy to spot the functional hierarchy of roads, highlighting how infrastructure adapts to population density and traffic demand.
+
+*Data Source*: FDOT
+
+```{r, echo=FALSE}
+knitr::include_graphics("~/Desktop/Penn/24Fall/communication/30/day1/30daysall/02-Wenjun-Lines.png")
+
+```
+
+
+# Day 3: Polygon
+## Population Distribution in NYC Census Tracts 
+
+This map shows population distribution across NYC census tracts, highlighting areas with higher densities in brighter colors (obviously is Manhattan). Tracts with zero population, such as those dominated by water or parks, have been excluded for clarity. 
+
+*Design Consideration*: A gradient palette emphasizes population variation, while the soft background ensures readability and focus on the data.
+
+*Data Source*: ACS
+
+```{r, echo=FALSE}
+knitr::include_graphics("~/Desktop/Penn/24Fall/communication/30/day1/30daysall/03-Wenjun-Polygon.png")
+
+```
+
+
+
+# Day 4: Hexagons
+## South of France Restaurant Concentration
+
+This hexagonal map captures the distribution of restaurants in the South of France, with coastal areas showing higher densities. Popular tourist destinations stand out with over 50 restaurants per hexagon. The analysis began with obtaining France's district boundaries, followed by geolocating restaurant data to each district. Since districts in this region are relatively small, converting them into hexagons introduced 
+relatively small error. 
+
+*Design Consideration*: Hexagonal bins provide consistent spatial coverage, while a gradient from yellow to deep blue emphasizes restaurant density patterns across the region.
+
+*Data Source*: INSEE
+
+```{r, echo=FALSE}
+knitr::include_graphics("~/Desktop/Penn/24Fall/communication/30/day1/30daysall/04-Wenjun-Hexagons.png")
+
+```
+
+
+
+# Day 6: Raster
+## South of France Restaurant Concentration
+
+This set of raster maps illustrates three key air pollutants in NYC: PM2.5, Nitric Oxide, and Black Carbon. High PM2.5 concentrations are notable in central Manhattan, driven by traffic, dense construction, and limited air circulation. Nitric Oxide hotspots align with major highways and bridges like the Brooklyn-Queens Expressway, reflecting vehicle emissions. Black Carbon peaks in areas with heavy diesel traffic, industrial zones, and port activity. 
+
+*Design Consideration*: I use three maps side by side makes it easier to see something interesting—not all pollution works the same way. Even in a big city like NYC, different areas tell different stories about what’s happening and why.
+
+```{r, echo=FALSE}
+knitr::include_graphics("~/Desktop/Penn/24Fall/communication/30/day1/30daysall/06-Wenjun-Raster.png")
+
+```
+
+
+
+
+# Day 7: Vintage
+## Center City of Venice
+
+This map shows central Venice with a vintage-inspired design, using sepia tones and a paper-like texture. While the colors and style fit the theme, for me I think the linework and labels still need adjustments to better capture the classic feel.
+
+
+```{r, echo=FALSE}
+knitr::include_graphics("~/Desktop/Penn/24Fall/communication/30/day1/30daysall/07-Wenjun-Vintage.png")
+```
+
+
+
+# Day 9: AI only
+## South of France Restaurant Concentration
+
+For AI-only, I generated Map 1 (United Kingdom) directly using AI, which is visually striking but less customizable. 
+
+In contrast, Map 2 (Philadelphia heatmap) was created using AI-generated R code, providing both accuracy and flexibility for further refinement.
+
+Here’s the prompt I used for Map 2:
+
+I want to create a map in R using only census data. I need to:
+
+Retrieve median household income (B19013_001) at the census tract level for Philadelphia County using the tidycensus package.
+Map the data using ggplot2 with census tract boundaries.
+Use a color gradient (e.g.viridis) to represent income levels.
+Add a legend for income, a map title ("Median Household Income in Philadelphia"), and axis labels.
+
+
+### Map9-1
+
+```{r, echo=FALSE}
+knitr::include_graphics("~/Desktop/Penn/24Fall/communication/30/day1/30daysall/09-Wenjun-AI.png")
+
+```
+
+
+### Map9-2
+
+```{r, echo=FALSE}
+knitr::include_graphics("~/Desktop/Penn/24Fall/communication/30/day1/30daysall/09-Wenjun-AIonly.png")
+
+```
+
+# Day 10: Pen and Paper
+## Draft Plan for Fenshutang Village
+
+This map is based on a previous planning project and drawn by hand to emphasize the spatial relationships in the village. Through this method, we can clearly perceive the distances between buildings and the connections between nature, roads, and public spaces, creating a more intuitive understanding of the layout.
+
+
+```{r, echo=FALSE}
+knitr::include_graphics("~/Desktop/Penn/24Fall/communication/30/day1/30daysall/10-Wenjun-Pen.png")
+```
+
+# Day 12: Time and Space
+## Land Cover Change Analysis: Houston (2005–2015)
+
+I analyzed land cover raster data by reclassifying different land types into "permeable" and "impermeable" categories. By subtracting the two rasters, I calculated the increase in impermeable surfaces from 2005 to 2015, visualized in the third map. This highlights how urbanization has replaced permeable areas (like green spaces) with impermeable surfaces (like roads and buildings), offering insight into environmental changes and their potential impacts on stormwater management and urban heat.
+
+*Design Consideration*: The maps are laid out side by side to allow easy comparison of land cover in 2005 and 2015, with the change map on the right clearly showing affected areas in red.
+
+*Data Source*: HGAC
+
+```{r, echo=FALSE}
+knitr::include_graphics("~/Desktop/Penn/24Fall/communication/30/day1/30daysall/12-Wenjun-Space&Time.png")
+```
+
+
+# Day 14: A World Map
+## Human Development Index, 2021
+
+This map shows the Human Development Index (HDI) for countries around the world in 2021. HDI is a way to measure things like life expectancy, education, and income levels. To make this map, I downloaded the HDI data from the UNDP website and did a spatial join with a world map. The colors make it easy to spot differences—darker blue means higher development, while lighter shades show lower levels.
+
+*Data Source*: UNDP
+
+```{r, echo=FALSE}
+knitr::include_graphics("~/Desktop/Penn/24Fall/communication/30/day1/30daysall/14-Wenjun-World Map.png")
+```
+
+
+
+# Day 16: Choropleth Map
+## Environmental Inequality in Orange County, California
+
+This map explores environmental inequality in Orange County by visualizing pollution burden (x) and population vulnerability (y) percentiles for each census tract. Areas with higher pollution exposure and more vulnerable populations are highlighted in darker shades, indicating hotspots of environmental inequality.
+
+*Data Source*: OEHHA
+
+```{r, echo=FALSE}
+knitr::include_graphics("~/Desktop/Penn/24Fall/communication/30/day1/30daysall/16-Wenjun-Choropleth.png")
+```
